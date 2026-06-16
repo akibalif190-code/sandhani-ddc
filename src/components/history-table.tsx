@@ -95,7 +95,7 @@ export function HistoryTable({ onViewPdf, refreshTrigger }: HistoryTableProps) {
               className="pl-12 rounded-none focus:z-10 bg-card border-border h-12 text-base shadow-none"
             />
           </div>
-          <Select value={filter} onValueChange={setFilter}>
+          <Select value={filter} onValueChange={(val) => setFilter(val || "all")}>
             <SelectTrigger className="!h-12 w-[160px] sm:w-[180px] px-4 text-sm font-medium bg-card border border-border transition-colors rounded-none flex-shrink-0 shadow-none focus:z-10">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <SlidersHorizontal className="h-4 w-4" />
