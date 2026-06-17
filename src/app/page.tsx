@@ -49,8 +49,7 @@ export default function Dashboard() {
 
   const handleLogout = async () => {
     try {
-      // 1. Obliterate offline encrypted database for security
-      await clearAllPatients();
+      // 1. Data remains encrypted on disk. We NEVER obliterate data.
       // 2. Wipe derived decryption key from RAM
       clearEncryptionKey();
       // 3. Wipe UI verification flags

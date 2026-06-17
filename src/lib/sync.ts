@@ -38,11 +38,11 @@ function removeFromSyncQueue(patientId: string): void {
 }
 
 async function forceLogout() {
-  await clearAllPatients();
+  // We NEVER obliterate data. It is safely encrypted at rest.
   clearEncryptionKey();
   localStorage.removeItem("isAuthenticated");
   localStorage.removeItem("authVerification");
-  window.location.href = "/login";
+  window.location.href = "/login?error=session_expired";
 }
 
 async function syncRecordToCloud(record: PatientRecord): Promise<boolean> {
