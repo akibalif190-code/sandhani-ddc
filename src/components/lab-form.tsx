@@ -23,9 +23,9 @@ import {
 } from "@/components/ui/form";
 import { toast } from "sonner";
 import { Save, Phone, Calendar, Droplet, FileText, User, Loader2 } from "lucide-react";
-import { savePatient } from "@/lib/localforage";
+import { saveReport } from "@/lib/localforage";
 import { syncToCloud } from "@/lib/sync";
-import type { PatientRecord, TestName } from "@/lib/types";
+import type { ReportRecord, TestName } from "@/lib/types";
 import { TEST_LABELS } from "@/lib/types";
 
 function generateRefId(): string {
@@ -49,7 +49,7 @@ const TEST_RESULT = z.enum(["Negative", "Positive"]).optional();
 
 const formSchema = z
   .object({
-    name: z.string().min(1, "Patient name is required"),
+    name: z.string().min(1, "Report name is required"),
     age: z
       .string()
       .min(1, "Age is required")
@@ -71,8 +71,8 @@ const formSchema = z
 type FormValues = z.infer<typeof formSchema>;
 
 interface LabFormProps {
-  onSaved: (record: PatientRecord, generatePdf: boolean) => void;
-  initialData?: PatientRecord;
+  onSaved: (record: ReportRecord, generatePdf: boolean) => void;
+  initialData?: ReportRecord;
   isEditMode?: boolean;
 }
 
@@ -116,7 +116,7 @@ export function LabForm({ onSaved, initialData, isEditMode = false }: LabFormPro
 
     try {
       const now = new Date();
-      const record: PatientRecord = {
+      const record: ReportRecord = {
         id: initialData?.id ?? crypto.randomUUID(),
         refId: initialData?.refId ?? generateRefId(),
         name: values.name.trim(),
@@ -138,15 +138,15 @@ export function LabForm({ onSaved, initialData, isEditMode = false }: LabFormPro
         synced: false,
       };
 
-      await savePatient(record);
+      await saveReport(record);
 
       if (generatePdf) {
         toast.success("Record saved. Generating PDF...", {
-          description: `Patient ${record.refId} has been securely stored.`,
+          description: `Report ${record.refId} has been securely stored.`,
         });
       } else {
         toast.success("Record saved", {
-          description: `Patient ${record.refId} has been securely stored.`,
+          description: `Report ${record.refId} has been securely stored.`,
         });
       }
 
@@ -184,7 +184,7 @@ export function LabForm({ onSaved, initialData, isEditMode = false }: LabFormPro
       <div className={isEditMode ? "bg-card flex flex-col" : "border border-border bg-card flex flex-col"}>
         <Form {...form}>
           <form noValidate>
-            {/* Patient Details Section */}
+            {/* Report Details Section */}
             <section className="p-6 md:p-10">
               <div className="grid gap-x-8 gap-y-8 sm:grid-cols-2">
                 {/* Name */}

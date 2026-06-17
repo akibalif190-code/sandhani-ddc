@@ -1,9 +1,9 @@
-export interface PatientRecord {
+export interface ReportRecord {
   id: string;
   refId: string;
   name: string;
   age: number;
-  sex: "Male" | "Female" | "Other" | string;
+  sex: "Male" | "Female" | "Other";
   mobile: string;
   date: string;
   time: string;

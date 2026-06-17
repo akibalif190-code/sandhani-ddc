@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/db";
-import { patients } from "@/db/schema";
+import { reports } from "@/db/schema";
 import { sql } from "drizzle-orm";
-import type { PatientRecord } from "@/lib/types";
+import type { ReportRecord } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
     const db = getDb();
-    const allRecords = await db.select().from(patients);
+    const allRecords = await db.select().from(reports);
     return NextResponse.json({ success: true, records: allRecords });
   } catch (error) {
     console.error("Sync GET error:", error);
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
   try {
     const db = getDb();
     const body = await req.json();
-    const records: PatientRecord[] = Array.isArray(body) ? body : [body];
+    const records: ReportRecord[] = Array.isArray(body) ? body : [body];
 
     if (records.length === 0) {
       return NextResponse.json({ success: true, count: 0 });
@@ -48,10 +48,10 @@ export async function POST(req: Request) {
       synced: true,
     }));
 
-    await db.insert(patients)
+    await db.insert(reports)
       .values(values)
       .onConflictDoUpdate({
-        target: patients.id,
+        target: reports.id,
         set: {
           refId: sql`EXCLUDED.ref_id`,
           name: sql`EXCLUDED.name`,

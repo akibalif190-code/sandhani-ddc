@@ -2,12 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import { X, FileText } from "lucide-react";
-import type { PatientRecord } from "@/lib/types";
+import type { ReportRecord } from "@/lib/types";
 import { PDFViewer } from "@react-pdf/renderer";
 import { ReportDocument } from "./report-document";
 
 interface PdfPreviewProps {
-  record: PatientRecord;
+  record: ReportRecord;
   onClose: () => void;
 }
 

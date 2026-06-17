@@ -1,7 +1,7 @@
 "use client";
 
 import { Document, Page, View, Text, StyleSheet } from "@react-pdf/renderer";
-import type { PatientRecord } from "@/lib/types";
+import type { ReportRecord } from "@/lib/types";
 import { TEST_LABELS, type TestName } from "@/lib/types";
 
 const styles = StyleSheet.create({
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
 });
 
 interface ReportDocumentProps {
-  record: PatientRecord;
+  record: ReportRecord;
 }
 
 const testNames: TestName[] = ["hbsAg", "hcv", "malaria", "hiv", "vdrl"];
@@ -168,10 +168,10 @@ export function ReportDocument({ record }: ReportDocumentProps) {
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        {/* Patient Info */}
+        {/* Report Info */}
         <View style={styles.metaGrid}>
           <View style={styles.metaItemName}>
-            <Text style={styles.metaLabel}>Patient Name</Text>
+            <Text style={styles.metaLabel}>Report Name</Text>
             <Text style={styles.metaValue}>{record.name}</Text>
           </View>
           <View style={styles.metaItemSmall}>

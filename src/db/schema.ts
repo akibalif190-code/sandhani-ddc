@@ -1,6 +1,6 @@
 import { pgTable, varchar, integer, boolean, bigint } from "drizzle-orm/pg-core";
 
-export const patients = pgTable("patients", {
+export const reports = pgTable("reports", {
   id: varchar("id", { length: 255 }).primaryKey(),
   refId: varchar("ref_id", { length: 255 }).notNull(),
   name: varchar("name", { length: 255 }).notNull(),

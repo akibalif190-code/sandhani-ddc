@@ -1,11 +1,11 @@
-import { getUnsyncedPatients, updatePatientSync, mergeServerRecords, clearAllPatients } from "./localforage";
+import { getUnsyncedReports, updateReportSync, mergeServerRecords, clearAllReports } from "./localforage";
 import { clearEncryptionKey } from "./store";
-import type { PatientRecord } from "./types";
+import type { ReportRecord } from "./types";
 
 const SYNC_QUEUE_KEY = "sondhani_sync_queue";
 
 interface SyncQueueItem {
-  patientId: string;
+  reportId: string;
   timestamp: number;
 }
 
@@ -24,16 +24,16 @@ function setSyncQueue(queue: SyncQueueItem[]): void {
   localStorage.setItem(SYNC_QUEUE_KEY, JSON.stringify(queue));
 }
 
-function addToSyncQueue(patientId: string): void {
+function addToSyncQueue(reportId: string): void {
   const queue = getSyncQueue();
-  if (!queue.find((q) => q.patientId === patientId)) {
-    queue.push({ patientId, timestamp: Date.now() });
+  if (!queue.find((q) => q.reportId === reportId)) {
+    queue.push({ reportId, timestamp: Date.now() });
     setSyncQueue(queue);
   }
 }
 
-function removeFromSyncQueue(patientId: string): void {
-  const queue = getSyncQueue().filter((q) => q.patientId !== patientId);
+function removeFromSyncQueue(reportId: string): void {
+  const queue = getSyncQueue().filter((q) => q.reportId !== reportId);
   setSyncQueue(queue);
 }
 
@@ -45,7 +45,7 @@ async function forceLogout() {
   window.location.href = "/login?error=session_expired";
 }
 
-async function syncRecordToCloud(record: PatientRecord): Promise<boolean> {
+async function syncRecordToCloud(record: ReportRecord): Promise<boolean> {
   console.log("[Sync] Pushing record to cloud:", record.refId);
   try {
     const res = await fetch("/api/sync", {
@@ -65,7 +65,7 @@ async function syncRecordToCloud(record: PatientRecord): Promise<boolean> {
   }
 }
 
-export async function syncToCloud(record: PatientRecord): Promise<void> {
+export async function syncToCloud(record: ReportRecord): Promise<void> {
   if (!navigator.onLine) {
     addToSyncQueue(record.id);
     return;
@@ -74,7 +74,7 @@ export async function syncToCloud(record: PatientRecord): Promise<void> {
   try {
     const success = await syncRecordToCloud(record);
     if (success) {
-      await updatePatientSync(record.id, true);
+      await updateReportSync(record.id, true);
       removeFromSyncQueue(record.id);
     } else {
       addToSyncQueue(record.id);
@@ -90,23 +90,23 @@ export async function flushSyncQueue(): Promise<void> {
   const queue = getSyncQueue();
   if (queue.length === 0) return;
 
-  const unsynced = await getUnsyncedPatients();
+  const unsynced = await getUnsyncedReports();
   const unsyncedMap = new Map(unsynced.map((p) => [p.id, p]));
 
   for (const item of queue) {
-    const record = unsyncedMap.get(item.patientId);
+    const record = unsyncedMap.get(item.reportId);
     if (record) {
       try {
         const success = await syncRecordToCloud(record);
         if (success) {
-          await updatePatientSync(record.id, true);
+          await updateReportSync(record.id, true);
           removeFromSyncQueue(record.id);
         }
       } catch {
         // Will retry next time
       }
     } else {
-      removeFromSyncQueue(item.patientId);
+      removeFromSyncQueue(item.reportId);
     }
   }
 }

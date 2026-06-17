@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { getEncryptionKey, clearEncryptionKey } from "@/lib/store";
-import { clearAllPatients } from "@/lib/localforage";
+import { clearAllReports } from "@/lib/localforage";
 import { InstallPWA } from "@/components/install-pwa";
 import { LabForm } from "@/components/lab-form";
 import { HistoryTable } from "@/components/history-table";
@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Activity, ClipboardList, Beaker, Droplet, LogOut } from "lucide-react";
 import { Dialog, DialogPortal, DialogBackdrop, DialogPopup, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import type { PatientRecord } from "@/lib/types";
+import type { ReportRecord } from "@/lib/types";
 
 const PdfPreview = dynamic(() => import("@/components/pdf/pdf-preview"), {
   ssr: false,
@@ -23,8 +23,8 @@ const PdfPreview = dynamic(() => import("@/components/pdf/pdf-preview"), {
 
 export default function Dashboard() {
   const router = useRouter();
-  const [pdfRecord, setPdfRecord] = useState<PatientRecord | null>(null);
-  const [editingRecord, setEditingRecord] = useState<PatientRecord | null>(null);
+  const [pdfRecord, setPdfRecord] = useState<ReportRecord | null>(null);
+  const [editingRecord, setEditingRecord] = useState<ReportRecord | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
@@ -40,7 +40,7 @@ export default function Dashboard() {
     return cleanup;
   }, [router]);
 
-  const handleSaved = useCallback((record: PatientRecord, generatePdf: boolean) => {
+  const handleSaved = useCallback((record: ReportRecord, generatePdf: boolean) => {
     setRefreshTrigger((n) => n + 1);
     if (generatePdf) {
       setPdfRecord(record);
@@ -92,7 +92,7 @@ export default function Dashboard() {
         <div className="flex flex-col gap-8">
           <div>
             <h1 className="text-3xl font-semibold tracking-tight">Lab Operations</h1>
-            <p className="text-muted-foreground mt-2">Manage patient test records and generate PDF reports.</p>
+            <p className="text-muted-foreground mt-2">Manage report test records and generate PDF reports.</p>
           </div>
 
           <Tabs defaultValue="new-report" className="w-full">
@@ -103,7 +103,7 @@ export default function Dashboard() {
               </TabsTrigger>
               <TabsTrigger value="history" className="flex flex-1 items-center justify-center gap-2 px-3 md:px-6 h-full text-sm font-medium text-muted-foreground hover:text-muted-foreground data-active:bg-foreground data-active:text-background data-active:hover:text-background transition-colors m-0 rounded-none !shadow-none min-w-0">
                 <ClipboardList className="h-4 w-4 shrink-0" />
-                <span className="truncate">Patient History</span>
+                <span className="truncate">Report History</span>
               </TabsTrigger>
             </TabsList>
             

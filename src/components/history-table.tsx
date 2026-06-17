@@ -20,55 +20,55 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search, Trash2, Clock, Eye, SlidersHorizontal, Pencil, Download } from "lucide-react";
-import { getAllPatients, searchPatients, deletePatient } from "@/lib/localforage";
+import { getAllReports, searchReports, deleteReport } from "@/lib/localforage";
 import { cleanupExpiredRecords } from "@/lib/ttl";
-import type { PatientRecord } from "@/lib/types";
+import type { ReportRecord } from "@/lib/types";
 import { toast } from "sonner";
 
 interface HistoryTableProps {
-  onViewPdf: (record: PatientRecord) => void;
-  onEdit: (record: PatientRecord) => void;
+  onViewPdf: (record: ReportRecord) => void;
+  onEdit: (record: ReportRecord) => void;
   refreshTrigger?: number;
 }
 
 export function HistoryTable({ onViewPdf, onEdit, refreshTrigger }: HistoryTableProps) {
-  const [patients, setPatients] = useState<PatientRecord[]>([]);
+  const [reports, setReports] = useState<ReportRecord[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [loading, setLoading] = useState(true);
 
-  const loadPatients = useCallback(async () => {
+  const loadReports = useCallback(async () => {
     setLoading(true);
     const deleted = await cleanupExpiredRecords();
     if (deleted > 0) {
       toast.info(`Cleaned up ${deleted} expired record(s)`);
     }
     const data = searchQuery
-      ? await searchPatients(searchQuery)
-      : await getAllPatients();
-    setPatients(data);
+      ? await searchReports(searchQuery)
+      : await getAllReports();
+    setReports(data);
     setLoading(false);
   }, [searchQuery]);
 
   useEffect(() => {
-    setTimeout(() => loadPatients(), 0);
-  }, [loadPatients, refreshTrigger]);
+    setTimeout(() => loadReports(), 0);
+  }, [loadReports, refreshTrigger]);
 
   const handleSearch = (value: string) => {
     setSearchQuery(value);
   };
 
-  const handleDownload = async (patient: PatientRecord) => {
+  const handleDownload = async (report: ReportRecord) => {
     try {
       toast.loading("Generating PDF...", { id: "pdf-gen" });
       const { pdf } = await import("@react-pdf/renderer");
       const { ReportDocument } = await import("@/components/pdf/report-document");
       
-      const blob = await pdf(<ReportDocument record={patient} />).toBlob();
+      const blob = await pdf(<ReportDocument record={report} />).toBlob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `Sondhani_Report_${patient.refId}.pdf`;
+      a.download = `Sondhani_Report_${report.refId}.pdf`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -85,19 +85,19 @@ export function HistoryTable({ onViewPdf, onEdit, refreshTrigger }: HistoryTable
     if (!window.confirm(`Are you sure you want to delete report ${refId}? This action cannot be undone.`)) {
       return;
     }
-    await deletePatient(id);
+    await deleteReport(id);
     toast.success(`Deleted ${refId}`);
-    loadPatients();
+    loadReports();
   };
 
-  const hasPositiveTests = (p: PatientRecord) =>
+  const hasPositiveTests = (p: ReportRecord) =>
     p.hbsAg === "Positive" ||
     p.hcv === "Positive" ||
     p.malaria === "Positive" ||
     p.hiv === "Positive" ||
     p.vdrl === "Positive";
 
-  const displayedPatients = patients
+  const displayedReports = reports
     .filter((p) => {
       if (filter === "positive") return hasPositiveTests(p);
       if (filter === "negative") return !hasPositiveTests(p);
@@ -130,7 +130,7 @@ export function HistoryTable({ onViewPdf, onEdit, refreshTrigger }: HistoryTable
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Patients</SelectItem>
+              <SelectItem value="all">All Reports</SelectItem>
               <SelectItem value="newest">Newest First</SelectItem>
               <SelectItem value="oldest">Oldest First</SelectItem>
               <SelectItem value="positive">Positive Only</SelectItem>
@@ -146,13 +146,13 @@ export function HistoryTable({ onViewPdf, onEdit, refreshTrigger }: HistoryTable
           <div className="flex items-center justify-center py-20">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted border-t-foreground" />
           </div>
-        ) : patients.length === 0 ? (
+        ) : reports.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <Clock className="h-10 w-10 text-muted-foreground/30 mb-4" />
             <p className="text-sm font-medium text-muted-foreground">
               {searchQuery
-                ? "No patients match your search."
-                : "No patient records found in history."}
+                ? "No reports match your search."
+                : "No report records found in history."}
             </p>
           </div>
         ) : (
@@ -170,23 +170,23 @@ export function HistoryTable({ onViewPdf, onEdit, refreshTrigger }: HistoryTable
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {displayedPatients.map((patient) => (
-                  <TableRow key={patient.id} className="border-border/50 hover:bg-secondary/20 transition-colors">
+                {displayedReports.map((report) => (
+                  <TableRow key={report.id} className="border-border/50 hover:bg-secondary/20 transition-colors">
                     <TableCell className="font-mono text-xs text-muted-foreground pl-4">
-                      {patient.refId}
+                      {report.refId}
                     </TableCell>
                     <TableCell className="font-medium">
-                      {patient.name}
+                      {report.name}
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{patient.age}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{report.age}</TableCell>
                     <TableCell className="font-mono text-sm text-muted-foreground">
-                      {patient.mobile}
+                      {report.mobile}
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
-                      {patient.date}
+                      {report.date}
                     </TableCell>
                     <TableCell>
-                      {hasPositiveTests(patient) ? (
+                      {hasPositiveTests(report) ? (
                         <Badge variant="destructive" className="bg-destructive/10 text-destructive hover:bg-destructive/20 shadow-none border-none px-2.5 py-1">
                           Positive
                         </Badge>
@@ -201,7 +201,7 @@ export function HistoryTable({ onViewPdf, onEdit, refreshTrigger }: HistoryTable
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleDownload(patient)}
+                          onClick={() => handleDownload(report)}
                           className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-secondary/50"
                           title="Download PDF"
                         >
@@ -210,7 +210,7 @@ export function HistoryTable({ onViewPdf, onEdit, refreshTrigger }: HistoryTable
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => onViewPdf(patient)}
+                          onClick={() => onViewPdf(report)}
                           className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-secondary/50"
                           title="View PDF"
                         >
@@ -219,7 +219,7 @@ export function HistoryTable({ onViewPdf, onEdit, refreshTrigger }: HistoryTable
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => onEdit(patient)}
+                          onClick={() => onEdit(report)}
                           className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-secondary/50"
                           title="Edit report"
                         >
@@ -228,7 +228,7 @@ export function HistoryTable({ onViewPdf, onEdit, refreshTrigger }: HistoryTable
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleDelete(patient.id, patient.refId)}
+                          onClick={() => handleDelete(report.id, report.refId)}
                           className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                           title="Delete record"
                         >
