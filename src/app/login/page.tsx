@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Lock, User, Mail, WifiOff } from "lucide-react";
+import { Lock, User, Mail, WifiOff, Unlock as UnlockIcon } from "lucide-react";
 import { deriveKey, createVerificationData, verifyKey } from "@/lib/crypto";
 import { setEncryptionKey } from "@/lib/store";
 
@@ -12,9 +12,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
+  const [mode, setMode] = useState<"login" | "unlock" | null>(null);
   const router = useRouter();
 
   useEffect(() => {
+    // Check if we have an active session that just needs unlocking
+    const isAuth = localStorage.getItem("isAuthenticated") === "true";
+    setMode(isAuth ? "unlock" : "login");
+
+    // Network listeners
     setIsOffline(!navigator.onLine);
     const handleOnline = () => setIsOffline(false);
     const handleOffline = () => setIsOffline(true);
@@ -28,12 +34,12 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email && !isOffline) {
-      toast.error("Please enter the email");
+    if (mode === "login" && !email) {
+      toast.error("Please enter your email");
       return;
     }
     if (!password) {
-      toast.error("Please enter the password");
+      toast.error("Please enter your password");
       return;
     }
 
@@ -42,11 +48,14 @@ export default function LoginPage() {
       // 1. Derive the encryption key from the password
       const key = await deriveKey(password);
 
-      // 2. Offline Unlock Flow
-      if (isOffline) {
+      // 2. Unlock Flow (Used when page is refreshed or app is opened with an active session)
+      if (mode === "unlock") {
         const verification = localStorage.getItem("authVerification");
         if (!verification) {
-          toast.error("You must be online to log in for the first time.");
+          // Fallback if verification is somehow missing but they are "authenticated"
+          toast.error("Verification data missing. Please log in again.");
+          localStorage.removeItem("isAuthenticated");
+          setMode("login");
           setIsLoading(false);
           return;
         }
@@ -54,69 +63,84 @@ export default function LoginPage() {
         const valid = await verifyKey(key, verification);
         if (valid) {
           setEncryptionKey(key);
-          toast.success("Offline database unlocked!");
+          toast.success("Database unlocked!");
           router.push("/");
         } else {
-          toast.error("Incorrect password for offline access.");
+          toast.error("Incorrect password.");
         }
         setIsLoading(false);
         return;
       }
 
-      // 3. Online Login Flow
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      // 3. Full Login Flow (Requires Network)
+      if (mode === "login") {
+        if (isOffline) {
+          toast.error("You must be online to log in for the first time.");
+          setIsLoading(false);
+          return;
+        }
 
-      const data = await res.json();
+        const res = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
 
-      if (res.ok && data.success) {
-        // Save the key to volatile RAM
-        setEncryptionKey(key);
-        
-        // Create an offline verification token and save it to LocalStorage
-        const verification = await createVerificationData(key);
-        localStorage.setItem("authVerification", verification);
-        localStorage.setItem("isAuthenticated", "true");
-        
-        toast.success("Login successful");
-        router.push("/");
-      } else {
-        toast.error(data.error || "Login failed");
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          // Save the key to volatile RAM
+          setEncryptionKey(key);
+          
+          // Create an offline verification token and save it to LocalStorage
+          const verification = await createVerificationData(key);
+          localStorage.setItem("authVerification", verification);
+          localStorage.setItem("isAuthenticated", "true");
+          
+          toast.success("Login successful");
+          router.push("/");
+        } else {
+          toast.error(data.error || "Login failed");
+        }
       }
     } catch (err) {
-      toast.error("Network error. Try logging in offline if you have logged in before.");
+      toast.error("Network error during login.");
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Prevent rendering until we determine the mode to avoid hydration flicker
+  if (mode === null) return null;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 mb-4">
-            {isOffline ? (
+            {mode === "unlock" ? (
+               <UnlockIcon className="h-6 w-6 text-primary" />
+            ) : isOffline ? (
                <WifiOff className="h-6 w-6 text-primary" />
             ) : (
                <User className="h-6 w-6 text-primary" />
             )}
           </div>
           <h1 className="text-2xl font-bold tracking-tight">
-            {isOffline ? "Offline Unlock" : "Welcome Back"}
+            {mode === "unlock" ? "Unlock Database" : "Welcome Back"}
           </h1>
           <p className="text-sm text-muted-foreground mt-2 px-2">
-            {isOffline 
-              ? "Enter your password to decrypt the local database."
-              : "Enter your credentials to access the system."}
+            {mode === "unlock" 
+              ? "Enter your password to decrypt the local database and resume your session."
+              : isOffline 
+                ? "You must be connected to the internet to log in."
+                : "Enter your credentials to log in to the system."}
           </p>
         </div>
 
         <form onSubmit={handleLogin}>
           <div className="flex flex-col w-full overflow-hidden rounded-md border border-border focus-within:ring-1 focus-within:ring-ring bg-muted">
-            {!isOffline && (
+            {mode === "login" && (
               <div className="relative w-full border-b border-border">
                 <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                 <input
@@ -126,7 +150,8 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   autoComplete="email"
-                  className="h-11 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                  disabled={isOffline}
+                  className="h-11 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground disabled:opacity-50"
                   style={{ paddingLeft: "2.75rem", paddingRight: "0.75rem" }}
                 />
               </div>
@@ -140,17 +165,18 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
-                autoFocus={isOffline}
-                className="h-11 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                autoFocus={true}
+                disabled={mode === "login" && isOffline}
+                className="h-11 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground disabled:opacity-50"
                 style={{ paddingLeft: "2.75rem", paddingRight: "0.75rem" }}
               />
             </div>
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || (mode === "login" && isOffline)}
               className="h-11 w-full bg-primary text-primary-foreground text-xs font-semibold tracking-widest uppercase disabled:opacity-50 transition-colors hover:bg-primary/80"
             >
-              {isLoading ? "..." : (isOffline ? "Unlock" : "Sign In")}
+              {isLoading ? "..." : (mode === "unlock" ? "Unlock" : "Sign In")}
             </button>
           </div>
         </form>
