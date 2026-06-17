@@ -1,10 +1,10 @@
-const CACHE_NAME = 'sondhani-ddc-cache-v1';
+const CACHE_NAME = 'sondhani-ddc-cache-v2';
 
 // Add the assets you want to be cached immediately
 const PRECACHE_ASSETS = [
   '/',
   '/offline',
-  '/manifest.json',
+  '/manifest.webmanifest',
   '/icon-192x192.png',
   '/icon-512x512.png',
   '/file.svg',
@@ -19,7 +19,13 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('[Service Worker] Pre-caching offline pages');
-        return cache.addAll(PRECACHE_ASSETS);
+        return Promise.all(
+          PRECACHE_ASSETS.map(url => {
+            return cache.add(url).catch(err => {
+              console.error('[Service Worker] Failed to precache:', url, err);
+            });
+          })
+        );
       })
       .then(() => self.skipWaiting())
   );
