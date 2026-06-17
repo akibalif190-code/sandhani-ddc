@@ -50,12 +50,12 @@ const styles = StyleSheet.create({
     paddingRight: 4,
   },
   metaItemName: {
-    width: "70%",
+    width: "50%",
     marginBottom: 14,
     paddingRight: 12,
   },
   metaItemSmall: {
-    width: "15%",
+    width: "25%",
     marginBottom: 14,
   },
   metaItemHalf: {
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   signatureContainer: {
-    marginTop: 60,
+    marginTop: 80,
     alignSelf: "flex-end",
     width: 160,
     borderTopWidth: 1,
