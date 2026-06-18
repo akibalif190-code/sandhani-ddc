@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   serverExternalPackages: ["@react-pdf/renderer"],
   turbopack: {},
+  allowedDevOrigins: ["192.168.1.102"],
 
   webpack: (config) => {
     config.resolve = config.resolve || {};
