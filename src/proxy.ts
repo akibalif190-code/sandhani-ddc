@@ -14,11 +14,14 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Allow static assets
+  // Allow static assets and social preview images
   if (
     pathname.startsWith('/_next') ||
     pathname.includes('.') || 
-    pathname.startsWith('/api/cron') // if any
+    pathname.startsWith('/api/cron') ||
+    pathname === '/opengraph-image' ||
+    pathname === '/apple-icon' ||
+    pathname === '/icon'
   ) {
     return NextResponse.next()
   }
@@ -49,6 +52,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|manifest.json|sw.js|workbox-.*|icon-.*\\.png|.*\\.svg).*)',
+    '/((?!_next/static|_next/image|favicon.ico|opengraph-image|apple-icon|icon|manifest.webmanifest|manifest.json|sw.js|workbox-.*|icon-.*\\.png|.*\\.svg).*)',
   ],
 }
