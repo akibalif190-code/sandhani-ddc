@@ -35,7 +35,7 @@ export default function Dashboard() {
     }
 
     cleanupExpiredRecords();
-    const cleanup = initSyncListeners();
+    const cleanup = initSyncListeners(() => setRefreshTrigger((n) => n + 1));
     return cleanup;
   }, [router]);
 

@@ -132,18 +132,22 @@ export async function pullFromCloud(): Promise<void> {
   }
 }
 
-export function initSyncListeners(): () => void {
-  const handleOnline = async () => {
-    console.log("[Sync] Back online, syncing...");
+export function initSyncListeners(onSync?: () => void): () => void {
+  async function syncAll() {
     await pullFromCloud();
     await flushSyncQueue();
+    onSync?.();
+  }
+
+  const handleOnline = async () => {
+    console.log("[Sync] Back online, syncing...");
+    await syncAll();
   };
 
   window.addEventListener("online", handleOnline);
 
-  // Try syncing on init if online
   if (navigator.onLine) {
-    pullFromCloud().then(() => flushSyncQueue());
+    syncAll();
   }
 
   return () => {
