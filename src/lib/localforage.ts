@@ -54,8 +54,8 @@ export async function getAllReports(): Promise<ReportRecord[]> {
         const plaintext = await decryptData(ciphertext, key);
         const value = JSON.parse(plaintext) as ReportRecord;
         if (!value.isDeleted) reports.push(value);
-      } catch {
-        console.error("Skipping corrupted or un-decryptable record:", k);
+      } catch (err) {
+        console.error("Skipping corrupted or un-decryptable record:", k, err);
       }
     }
   }
