@@ -251,7 +251,6 @@ export function HistoryTable({ onViewPdf, onEdit, refreshTrigger }: HistoryTable
                 <TableRow className="hover:bg-transparent border-border/50 bg-secondary/30">
                   <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-muted-foreground pl-4">Ref ID</TableHead>
                   <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-muted-foreground">Name</TableHead>
-                  <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-muted-foreground">Age</TableHead>
                   <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-muted-foreground">Mobile</TableHead>
                   <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-muted-foreground">Date</TableHead>
                   <TableHead className="font-medium text-xs uppercase tracking-wider h-10 text-muted-foreground">Status</TableHead>
@@ -267,7 +266,6 @@ export function HistoryTable({ onViewPdf, onEdit, refreshTrigger }: HistoryTable
                     <TableCell className="font-medium">
                       {report.name}
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{report.age}</TableCell>
                     <TableCell className="font-mono text-sm text-muted-foreground">
                       {report.mobile}
                     </TableCell>
