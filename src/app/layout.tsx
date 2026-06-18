@@ -11,10 +11,10 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-const APP_NAME = "Sondhani DDC";
-const APP_DEFAULT_TITLE = "Sondhani DDC";
-const APP_TITLE_TEMPLATE = "%s - Sondhani DDC";
-const APP_DESCRIPTION = "Offline-first medical lab report management system for Sondhani DDC";
+const APP_NAME = "Sandhani DDC";
+const APP_DEFAULT_TITLE = "Sandhani DDC";
+const APP_TITLE_TEMPLATE = "%s - Sandhani DDC";
+const APP_DESCRIPTION = "Offline-first medical lab report management system for Sandhani DDC";
 
 export const metadata: Metadata = {
   applicationName: APP_NAME,
@@ -23,10 +23,10 @@ export const metadata: Metadata = {
     template: APP_TITLE_TEMPLATE,
   },
   description: APP_DESCRIPTION,
-  keywords: ["Lab Report", "Medical", "Sondhani DDC", "Sondhani Group", "Offline Lab", "PWA", "Diagnostic Center"],
-  authors: [{ name: "Sondhani DDC" }],
-  creator: "Sondhani DDC",
-  publisher: "Sondhani DDC",
+  keywords: ["Lab Report", "Medical", "Sandhani DDC", "Sandhani Group", "Offline Lab", "PWA", "Diagnostic Center"],
+  authors: [{ name: "Sandhani DDC" }],
+  creator: "Sandhani DDC",
+  publisher: "Sandhani DDC",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
         url: "/icon-512x512.png",
         width: 512,
         height: 512,
-        alt: "Sondhani DDC",
+        alt: "Sandhani DDC",
       },
     ],
   },
@@ -92,7 +92,7 @@ export default function RootLayout({
         </Providers>
         <footer className="w-full py-12">
           <div className="container max-w-4xl mx-auto px-4 md:px-8 text-center text-sm text-muted-foreground space-y-1">
-            <p>© {new Date().getFullYear()} Sondhani DDC. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} Sandhani DDC. All rights reserved.</p>
             <p>
               Developed by{" "}
               <a

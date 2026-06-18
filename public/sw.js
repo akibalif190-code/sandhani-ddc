@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sondhani-ddc-cache-v9';
+const CACHE_NAME = 'sandhani-ddc-cache-v9';
 
 // Add the assets you want to be cached immediately
 const PRECACHE_ASSETS = [

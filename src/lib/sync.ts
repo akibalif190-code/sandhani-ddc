@@ -2,7 +2,7 @@ import { getUnsyncedReports, updateReportSync, mergeServerRecords } from "./loca
 import { clearEncryptionKey } from "./store";
 import type { ReportRecord } from "./types";
 
-const SYNC_QUEUE_KEY = "sondhani_sync_queue";
+const SYNC_QUEUE_KEY = "sandhani_sync_queue";
 
 interface SyncQueueItem {
   reportId: string;

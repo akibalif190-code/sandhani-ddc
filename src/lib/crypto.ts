@@ -1,7 +1,7 @@
 // Utility for client-side cryptographic operations
 // Uses Web Crypto API (SubtleCrypto)
 
-const SALT = "sondhani_secure_salt_2026"; // Hardcoded salt for PBKDF2. In a multi-user high-security system, this would be a per-user salt.
+const SALT = "sandhani_secure_salt_2026"; // Hardcoded salt for PBKDF2. In a multi-user high-security system, this would be a per-user salt.
 
 /**
  * Derives an AES-GCM encryption key from a string password using PBKDF2.

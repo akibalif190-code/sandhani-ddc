@@ -102,7 +102,7 @@ export function HistoryTable({ onViewPdf, onEdit, refreshTrigger }: HistoryTable
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `Sondhani_Report_${report.refId}.pdf`;
+      a.download = `Sandhani_Report_${report.refId}.pdf`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

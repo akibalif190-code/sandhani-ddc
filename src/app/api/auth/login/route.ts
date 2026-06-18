@@ -3,7 +3,7 @@ import { SignJWT } from "jose";
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
-const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-sondhani";
+const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-sandhani";
 
 export async function POST(req: Request) {
   try {

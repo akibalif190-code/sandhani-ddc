@@ -41,7 +41,7 @@ export default function PdfPreview({ record, onClose }: PdfPreviewProps) {
     if (!blobUrl) return;
     const a = document.createElement("a");
     a.href = blobUrl;
-    a.download = `Sondhani_Report_${record.refId}.pdf`;
+    a.download = `Sandhani_Report_${record.refId}.pdf`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

@@ -37,7 +37,7 @@ export async function proxy(request: NextRequest) {
   }
 
   try {
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret-sondhani')
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret-sandhani')
     await jwtVerify(token, secret)
     return NextResponse.next()
   } catch {

@@ -4,7 +4,7 @@ import { encryptData, decryptData } from "./crypto";
 import { getEncryptionKey } from "./store";
 
 const reportStore = localforage.createInstance({
-  name: "SondhaniLabDB",
+  name: "SandhaniLabDB",
   storeName: "reports",
   driver: localforage.INDEXEDDB,
 });
