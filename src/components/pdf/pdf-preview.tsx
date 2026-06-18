@@ -1,9 +1,10 @@
 "use client";
 
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { X, FileText } from "lucide-react";
+import { X, FileText, Download, ExternalLink } from "lucide-react";
 import type { ReportRecord } from "@/lib/types";
-import { PDFViewer } from "@react-pdf/renderer";
+import { pdf } from "@react-pdf/renderer";
 import { ReportDocument } from "./report-document";
 
 interface PdfPreviewProps {
@@ -12,6 +13,38 @@ interface PdfPreviewProps {
 }
 
 export default function PdfPreview({ record, onClose }: PdfPreviewProps) {
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const generate = async () => {
+      try {
+        setLoading(true);
+        const blob = await pdf(<ReportDocument record={record} />).toBlob();
+        const url = URL.createObjectURL(blob);
+        setBlobUrl(url);
+      } catch (e) {
+        console.error("PDF generation failed:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    generate();
+    return () => {
+      if (blobUrl) URL.revokeObjectURL(blobUrl);
+    };
+  }, [record]);
+
+  const handleDownload = useCallback(async () => {
+    if (!blobUrl) return;
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = `Sondhani_Report_${record.refId}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }, [blobUrl, record.refId]);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 sm:p-6 lg:p-8">
       <div className="bg-white rounded-2xl shadow-2xl overflow-hidden w-full max-w-4xl h-full max-h-[90vh] flex flex-col ring-1 ring-slate-900/5">
@@ -29,6 +62,28 @@ export default function PdfPreview({ record, onClose }: PdfPreviewProps) {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {blobUrl && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleDownload}
+                  className="text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-md h-8 w-8"
+                  title="Download PDF"
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => window.open(blobUrl, "_blank")}
+                  className="text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-md h-8 w-8"
+                  title="Open in new tab"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                </Button>
+              </>
+            )}
             <Button
               variant="ghost"
               size="icon"
@@ -43,9 +98,21 @@ export default function PdfPreview({ record, onClose }: PdfPreviewProps) {
         {/* PDF Viewer */}
         <div className="flex-1 bg-slate-100/50 p-2 sm:p-4">
           <div className="h-full w-full rounded-xl overflow-hidden shadow-sm border border-slate-200 bg-white">
-            <PDFViewer width="100%" height="100%" showToolbar={true}>
-              <ReportDocument record={record} />
-            </PDFViewer>
+            {loading ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-200 border-t-slate-800" />
+              </div>
+            ) : blobUrl ? (
+              <iframe
+                src={blobUrl}
+                className="h-full w-full border-0"
+                title="Report PDF"
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full text-sm text-slate-500">
+                Failed to generate PDF
+              </div>
+            )}
           </div>
         </div>
       </div>
